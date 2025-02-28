@@ -1,23 +1,35 @@
 @echo off
+chcp 65001 > nul
 
-title Outlook”é‘ƒAƒVƒXƒ^ƒ“ƒg
-echo Outlook”é‘ƒAƒVƒXƒ^ƒ“ƒg‚ğ‹N“®‚µ‚Ä‚¢‚Ü‚·...
+title Outlookç§˜æ›¸ã‚¢ã‚·ã‚¹ã‚¿ãƒ³ãƒˆ
+echo Outlookç§˜æ›¸ã‚¢ã‚·ã‚¹ã‚¿ãƒ³ãƒˆã‚’èµ·å‹•ã—ã¦ã„ã¾ã™...
 
-:: Python‚Ì‰¼‘zŠÂ‹«‚ğƒAƒNƒeƒBƒx[ƒg
-call .venv\Scripts\activate.bat
+:: Pythonã®ä»®æƒ³ç’°å¢ƒã‚’ã‚¢ã‚¯ãƒ†ã‚£ãƒ™ãƒ¼ãƒˆï¼ˆç’°å¢ƒã«åˆã‚ã›ã¦ä¿®æ­£ã—ã¦ãã ã•ã„ï¼‰
+if exist .venv\Scripts\activate.bat (
+    call .venv\Scripts\activate.bat
+) else if exist venv\Scripts\activate.bat (
+    call venv\Scripts\activate.bat
+) else (
+    echo ä»®æƒ³ç’°å¢ƒãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“ã€‚
+    echo ã¾ãšã€ä»¥ä¸‹ã®ã‚³ãƒãƒ³ãƒ‰ã§ä»®æƒ³ç’°å¢ƒã‚’ä½œæˆã—ã¦ãã ã•ã„ï¼š
+    echo python -m venv .venv
+    echo ãã®å¾Œã€pip install -r requirements.txt ã‚’å®Ÿè¡Œã—ã¦ãã ã•ã„ã€‚
+    pause
+    exit /b 1
+)
 
-:: API KEY‚ğŠÂ‹«•Ï”‚Æ‚µ‚Äİ’è
-set ANTHROPIC_API_KEY=YOYR_API_KEY
+:: API KEYã‚’ç’°å¢ƒå¤‰æ•°ã¨ã—ã¦è¨­å®š
+set ANTHROPIC_API_KEY=YOUR_API_KEY_HERE
 
-:: ƒJƒXƒ^ƒ€İ’è‚ÅƒXƒNƒŠƒvƒg‚ğÀs
+:: ã‚«ã‚¹ã‚¿ãƒ è¨­å®šã§ã‚¹ã‚¯ãƒªãƒ—ãƒˆã‚’å®Ÿè¡Œ
 python outlook_assistant.py ^
   --emails 15 ^
   --days 14 ^
-  --priority-keywords Š‹},d—v,‹Ù‹} ^
+  --priority-keywords è‡³æ€¥,é‡è¦,ç·Šæ€¥ ^
   --working-hours 0830 1730 ^
   --focus-time 10 12 ^
   --report-style detailed ^
   --api-key %ANTHROPIC_API_KEY%
 
-:: ÀsŒã‚ÉƒEƒBƒ“ƒhƒE‚ğŠJ‚¢‚½‚Ü‚Ü‚É‚·‚é
+:: å®Ÿè¡Œå¾Œã«ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚’é–‹ã„ãŸã¾ã¾ã«ã™ã‚‹
 pause

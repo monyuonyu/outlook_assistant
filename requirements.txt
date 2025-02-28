@@ -3,8 +3,8 @@
 # Outlookとの連携
 pywin32>=305
 
-# HTTP通信
-requests>=2.28.0
+# HTTP通信（Claude API用）
+requests>=2.31.0
 
 # コマンドライン引数解析
 argparse>=1.4.0
