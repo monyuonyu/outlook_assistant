@@ -61,10 +61,10 @@ jobs:
         # Python embeddedファイルをコピー
         xcopy /E /I python-embedded\* release\
         # アプリケーションファイルをコピー
-        xcopy /E /I "*.py" release\
-        xcopy /E /I "*.md" release\
-        xcopy /E /I "*.bat" release\
-        xcopy /E /I "requirements.txt" release\
+        Get-ChildItem -Path "." -Filter "*.py" -File | ForEach-Object { Copy-Item $_.FullName -Destination "release\" }
+        Get-ChildItem -Path "." -Filter "*.md" -File | ForEach-Object { Copy-Item $_.FullName -Destination "release\" }
+        Get-ChildItem -Path "." -Filter "*.bat" -File | ForEach-Object { Copy-Item $_.FullName -Destination "release\" }
+        if (Test-Path "requirements.txt") { Copy-Item "requirements.txt" -Destination "release\" }
         # リリースファイルをzip圧縮
         Compress-Archive -Path release\* -DestinationPath outlook_assistant_release.zip
 
