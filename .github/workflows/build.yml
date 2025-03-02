@@ -62,8 +62,10 @@ jobs:
       run: |
         # リリースフォルダを作成
         mkdir release
-        # Python embeddedファイルをコピー
-        xcopy /E /I python-embedded\* release\
+        # Python embedded用の子ディレクトリを作成
+        mkdir release\python
+        # Python embeddedファイルを子ディレクトリにコピー
+        xcopy /E /I python-embedded\* release\python\
         # アプリケーションファイルをコピー
         Get-ChildItem -Path "." -Filter "*.py" -File | ForEach-Object { Copy-Item $_.FullName -Destination "release\" }
         Get-ChildItem -Path "." -Filter "*.md" -File | ForEach-Object { Copy-Item $_.FullName -Destination "release\" }
