@@ -1,54 +1,99 @@
+# =============================================================================
+# Outlook Assistant ビルド自動化ワークフロー
+# 
+# このワークフローは、タグ（v*）がプッシュされたとき、または手動実行時に
+# Python embeddedを含む配布用パッケージを作成します。
+# =============================================================================
+
 name: Build and Release
 
+# ワークフローのトリガー設定
 on:
   push:
     tags:
-      - 'v*'
-  workflow_dispatch:
+      - 'v*'  # v で始まるタグがプッシュされたときにビルドを開始（例: v1.0.0）
+  workflow_dispatch:  # 手動でワークフローを実行可能
 
 jobs:
   build:
-    runs-on: windows-latest
+    name: Build Package
+    runs-on: windows-latest  # Windowsランナーを使用
 
     steps:
-    # リポジトリをチェックアウトするステップ
+    # リポジトリのチェックアウト
     - name: Checkout repository
-      uses: actions/checkout@v2
-
-    # Pythonをセットアップするステップ
-    - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/checkout@v4
       with:
-        python-version: '3.x'
+        fetch-depth: 0  # 履歴を完全に取得（タグ情報のため）
 
-    # 依存関係をインストールするステップ
+    # Pythonのセットアップ
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'  # 使用するPythonのバージョンを指定
+
+    # 依存パッケージのインストール
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    # テストを実行するステップ
+    # テストを実行
     - name: Run tests
       run: |
         python -m unittest discover
 
-    # Python embeddedをダウンロードして解凍するステップ
+    # Python embeddedパッケージをダウンロードして解凍
     - name: Download and extract Python embedded
       run: |
+        # 最新のPython 3.10.x埋め込み版をダウンロード
         curl -o python-embedded.zip -L https://www.python.org/ftp/python/3.10.11/python-3.10.11-embed-amd64.zip
+        # ダウンロードしたzipファイルを解凍
         Expand-Archive -Path python-embedded.zip -DestinationPath python-embedded
+        # pipモジュールを使用できるように設定ファイルを修正
+        echo "import site" | Out-File -Append -Encoding utf8 python-embedded\python310._pth
 
-    # リリース用のzipファイルを作成するステップ
-    - name: Create release zip
+    # リリース用パッケージの作成
+    - name: Create release package
       run: |
+        # リリースフォルダを作成
         mkdir release
+        # Python embeddedファイルをコピー
         xcopy /E /I python-embedded\* release\
-        xcopy /E /I * release\
+        # アプリケーションファイルをコピー
+        xcopy /E /I "*.py" release\
+        xcopy /E /I "*.md" release\
+        xcopy /E /I "*.bat" release\
+        xcopy /E /I "requirements.txt" release\
+        # リリースファイルをzip圧縮
         Compress-Archive -Path release\* -DestinationPath outlook_assistant_release.zip
 
-    # アーティファクトとしてzipファイルをアップロードするステップ
-    - name: Upload release artifact
-      uses: actions/upload-artifact@v2
+    # アーティファクトのアップロード
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
       with:
         name: outlook_assistant_release
         path: outlook_assistant_release.zip
+        retention-days: 5  # アーティファクトの保持期間
+
+    # リリースを作成（タグプッシュ時のみ）
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/v')
+      id: create_release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: outlook_assistant_release.zip
+        name: Outlook Assistant ${{ github.ref_name }}
+        draft: false
+        prerelease: false
+        generate_release_notes: true
+        body: |
+          # Outlook Assistant ${{ github.ref_name }} リリース
+          
+          このリリースには、Python embedded版を含むOutlook Assistantパッケージが含まれています。
+          
+          ## 使用方法
+          1. ZIPファイルをダウンロードして展開してください
+          2. `start_outlook_assistant.bat` を実行してください
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
