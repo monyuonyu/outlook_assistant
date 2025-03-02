@@ -14,6 +14,10 @@ on:
       - 'v*'  # v で始まるタグがプッシュされたときにビルドを開始（例: v1.0.0）
   workflow_dispatch:  # 手動でワークフローを実行可能
 
+# リポジトリへの書き込み権限を追加
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build Package
