@@ -57,6 +57,22 @@ jobs:
         # pipモジュールを使用できるように設定ファイルを修正
         echo "import site" | Out-File -Append -Encoding utf8 python-embedded\python310._pth
 
+    # Python embeddedにpipをインストール
+    - name: Install pip to embedded Python
+      run: |
+        # get-pip.pyをダウンロード
+        curl -o get-pip.py https://bootstrap.pypa.io/get-pip.py
+        # 組み込みPythonにpipをインストール
+        .\python-embedded\python.exe get-pip.py
+        # pipパスが通るように調整
+        Copy-Item -Path python-embedded\python.exe -Destination python-embedded\python3.exe
+
+    # 依存パッケージを組み込みPythonにインストール
+    - name: Install dependencies to embedded Python
+      run: |
+        # 依存パッケージをインストール
+        .\python-embedded\python.exe -m pip install -r requirements.txt --no-warn-script-location
+
     # リリース用パッケージの作成
     - name: Create release package
       run: |
